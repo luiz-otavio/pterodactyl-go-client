@@ -12,5 +12,5 @@ Pterodactyl wrapper written in Golang
 Would be nice if you contribute us with pull-requests for our project, its open!
 
 ## License
-That project is currently working with MIT License.
+That project is under in MIT License.
 Check out the LICENSE.md to read about it.

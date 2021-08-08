@@ -13,23 +13,37 @@ import (
 	"github.com/valyala/fastjson"
 )
 
+type PteroType int
+
+const (
+	Client PteroType = iota
+	Application
+)
+
 type PteroClient struct {
 	Key string
 	URL string
 
-	Client hystrix.Client
+	Connection hystrix.Client
+	Type       PteroType
 }
 
-func NewConnection(url string, key string, option bootstrap.HTTPOption) *PteroClient {
+type Body map[string]string
+
+func NewConnection(url string, key string, option bootstrap.HTTPOption, pteroType PteroType) *PteroClient {
 	return &PteroClient{
-		Key:    key,
-		URL:    url,
-		Client: *bootstrap.NewClient(option),
+		Key:        key,
+		URL:        url,
+		Connection: *bootstrap.NewClient(option),
+		Type:       pteroType,
 	}
 }
 
 func (client *PteroClient) Servers() (*fastjson.Value, error) {
-	response, err := client.Client.Get(client.URL+"/api/application/servers", client.header())
+	response, err := client.Connection.Get(
+		client.endpoint("servers"),
+		client.header(),
+	)
 
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -39,7 +53,10 @@ func (client *PteroClient) Servers() (*fastjson.Value, error) {
 }
 
 func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
-	response, err := client.Client.Get(client.URL+"api/application/servers/"+strconv.Itoa(id), client.header())
+	response, err := client.Connection.Get(
+		client.endpoint("servers/"+strconv.Itoa(id)),
+		client.header(),
+	)
 
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -49,7 +66,10 @@ func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
 }
 
 func (client *PteroClient) ExternalServerById(id int) (*fastjson.Value, error) {
-	response, err := client.Client.Get(client.URL+"api/application/servers/external/"+strconv.Itoa(id), client.header())
+	response, err := client.Connection.Get(
+		client.endpoint("servers/external"+strconv.Itoa(id)),
+		client.header(),
+	)
 
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -58,20 +78,72 @@ func (client *PteroClient) ExternalServerById(id int) (*fastjson.Value, error) {
 	return io.JSONBody(&response.Body)
 }
 
-func (client *PteroClient) ServerUpdate(id int, body map[string]string) int {
+func (client *PteroClient) UpdateDetails(id int, body Body) int {
 	buf, err := json.Marshal(body)
 
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
 
-	response, err := client.Client.Patch(client.URL+"api/applications/servers/"+strconv.Itoa(id)+"/details", bytes.NewReader(buf), client.header())
+	response, err := client.Connection.Patch(
+		client.endpoint("servers/"+strconv.Itoa(id)+"/details"),
+		bytes.NewReader(buf),
+		client.header(),
+	)
 
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
 
 	return response.StatusCode
+}
+
+func (client *PteroClient) UpdateInfo(id int, body Body) int {
+	buf, err := json.Marshal(body)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Patch(
+		client.endpoint("servers/"+strconv.Itoa(id)+"/build"),
+		bytes.NewReader(buf),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) UpdateStartup(id int, body Body) int {
+	buf, err := json.Marshal(body)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Patch(
+		client.endpoint("servers/"+strconv.Itoa(id)+"/startup"),
+		bytes.NewReader(buf),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) endpoint(target string) string {
+	if client.Type == Client {
+		return client.URL + "api/applications/" + target
+	} else {
+		return client.URL + "api/client/" + target
+	}
 }
 
 func (client *PteroClient) header() http.Header {

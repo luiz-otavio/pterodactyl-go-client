@@ -10,3 +10,7 @@ Pterodactyl wrapper written in Golang
 
 ### Contribuing
 Would be nice if you contribute us with pull-requests for our project, its open!
+
+## License
+That project is currently working with MIT License.
+Check out the LICENSE.md to read about it.

@@ -18,10 +18,10 @@ const (
 )
 
 const (
-	START = "start"
-	STOP = "stop"
+	START   = "start"
+	STOP    = "stop"
 	RESTART = "restart"
-	KILL = "kill"
+	KILL    = "kill"
 )
 
 type PteroClient struct {
@@ -130,6 +130,23 @@ func (client *PteroClient) UpdateEnvironment(name string, body Body) int {
 		client.endpoint("servers/"+name+"/startup/variable"),
 		client.header(),
 		body,
+	)
+}
+
+func (client *PteroClient) Create(info Body) int {
+	return http2.Post(
+		client,
+		client.endpoint("servers"),
+		client.header(),
+		info,
+	)
+}
+
+func (client *PteroClient) Delete(id int) int {
+	return http2.Delete(
+		client,
+		client.endpoint("servers/"+strconv.Itoa(id)),
+		client.header(),
 	)
 }
 

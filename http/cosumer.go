@@ -63,6 +63,19 @@ func Patch(client *pterodactyl.PteroClient, endpoint string, header http.Header,
 	return response.StatusCode
 }
 
+func Delete(client *pterodactyl.PteroClient, endpoint string, header http.Header) int {
+	response, err := client.Connection.Delete(
+		endpoint,
+		header,
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
 func Put(client *pterodactyl.PteroClient, endpoint string, header http.Header, body pterodactyl.Body) int {
 	buf, err := json.Marshal(body)
 

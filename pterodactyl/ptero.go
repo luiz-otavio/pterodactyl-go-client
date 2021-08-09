@@ -205,6 +205,52 @@ func (client *PteroClient) UpdateInfo(id int, body Body) int {
 	return response.StatusCode
 }
 
+func (client *PteroClient) UpdateEnvironment(name string, body Body) int {
+	buf, err := json.Marshal(body)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Put(
+		client.endpoint("servers/"+name+"/startup/variable"),
+		bytes.NewReader(buf),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) Environments(name string) (*fastjson.Value, error) {
+	response, err := client.Connection.Get(
+		client.endpoint("servers/"+name+"/startup"),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return io.JSONBody(&response.Body)
+}
+
+func (client *PteroClient) Resources(name string) (*fastjson.Value, error) {
+	response, err := client.Connection.Get(
+		client.endpoint("servers/"+name+"/resources"),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return io.JSONBody(&response.Body)
+}
+
 func (client *PteroClient) UpdateStartup(id int, body Body) int {
 	buf, err := json.Marshal(body)
 

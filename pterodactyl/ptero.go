@@ -1,7 +1,7 @@
 package pterodactyl
 
 import (
-	http2 "github.com/luiz-otavio/ptero-go/http"
+	consumer "github.com/luiz-otavio/ptero-go/util"
 	"net/http"
 	"strconv"
 
@@ -44,24 +44,24 @@ func NewConnection(url string, key string, option bootstrap.HTTPOption, pteroTyp
 }
 
 func (client *PteroClient) Servers() (*fastjson.Value, error) {
-	return http2.Get(
-		client,
+	return consumer.Get(
+		&client.Connection,
 		client.endpoint("servers"),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
-	return http2.Get(
-		client,
+	return consumer.Get(
+		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) Execute(uniqueId string, command string) int {
-	return http2.Post(
-		client,
+	return consumer.Post(
+		&client.Connection,
 		client.endpoint("servers/"+uniqueId+"/command"),
 		client.header(),
 		Body{
@@ -70,8 +70,8 @@ func (client *PteroClient) Execute(uniqueId string, command string) int {
 }
 
 func (client *PteroClient) Rename(uniqueId string, name string) int {
-	return http2.Post(
-		client,
+	return consumer.Post(
+		&client.Connection,
 		client.endpoint("servers/"+uniqueId+"/settings/rename"),
 		client.header(),
 		Body{
@@ -80,8 +80,8 @@ func (client *PteroClient) Rename(uniqueId string, name string) int {
 }
 
 func (client *PteroClient) Reinstall(uniqueId string) int {
-	return http2.Post(
-		client,
+	return consumer.Post(
+		&client.Connection,
 		client.endpoint("servers/"+uniqueId+"/settings/reinstall"),
 		client.header(),
 		nil,
@@ -89,8 +89,8 @@ func (client *PteroClient) Reinstall(uniqueId string) int {
 }
 
 func (client *PteroClient) Power(uniqueId string, power string) int {
-	return http2.Post(
-		client,
+	return consumer.Post(
+		&client.Connection,
 		client.endpoint("servers/"+uniqueId+"/power"),
 		client.header(),
 		Body{
@@ -99,16 +99,16 @@ func (client *PteroClient) Power(uniqueId string, power string) int {
 }
 
 func (client *PteroClient) ExternalServerById(id int) (*fastjson.Value, error) {
-	return http2.Get(
-		client,
+	return consumer.Get(
+		&client.Connection,
 		client.endpoint("servers/external/"+strconv.Itoa(id)),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) UpdateDetails(id int, body Body) int {
-	return http2.Patch(
-		client,
+	return consumer.Patch(
+		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/details"),
 		client.header(),
 		body,
@@ -116,8 +116,8 @@ func (client *PteroClient) UpdateDetails(id int, body Body) int {
 }
 
 func (client *PteroClient) UpdateInfo(id int, body Body) int {
-	return http2.Patch(
-		client,
+	return consumer.Patch(
+		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/build"),
 		client.header(),
 		body,
@@ -125,8 +125,8 @@ func (client *PteroClient) UpdateInfo(id int, body Body) int {
 }
 
 func (client *PteroClient) UpdateEnvironment(name string, body Body) int {
-	return http2.Put(
-		client,
+	return consumer.Put(
+		&client.Connection,
 		client.endpoint("servers/"+name+"/startup/variable"),
 		client.header(),
 		body,
@@ -134,8 +134,8 @@ func (client *PteroClient) UpdateEnvironment(name string, body Body) int {
 }
 
 func (client *PteroClient) Create(info Body) int {
-	return http2.Post(
-		client,
+	return consumer.Post(
+		&client.Connection,
 		client.endpoint("servers"),
 		client.header(),
 		info,
@@ -143,32 +143,32 @@ func (client *PteroClient) Create(info Body) int {
 }
 
 func (client *PteroClient) Delete(id int) int {
-	return http2.Delete(
-		client,
+	return consumer.Delete(
+		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) Environments(name string) (*fastjson.Value, error) {
-	return http2.Get(
-		client,
+	return consumer.Get(
+		&client.Connection,
 		client.endpoint("servers/"+name+"/startup"),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) Resources(name string) (*fastjson.Value, error) {
-	return http2.Get(
-		client,
+	return consumer.Get(
+		&client.Connection,
 		client.endpoint("servers/"+name+"/resources"),
 		client.header(),
 	)
 }
 
 func (client *PteroClient) UpdateStartup(id int, body Body) int {
-	return http2.Patch(
-		client,
+	return consumer.Patch(
+		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/startup"),
 		client.header(),
 		body,

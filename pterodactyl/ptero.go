@@ -1,15 +1,12 @@
 package pterodactyl
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
+	http2 "github.com/luiz-otavio/ptero-go/http"
 	"net/http"
 	"strconv"
 
 	"github.com/gojek/heimdall/v7/hystrix"
 	"github.com/luiz-otavio/ptero-go/bootstrap"
-	"github.com/luiz-otavio/ptero-go/io"
 	"github.com/valyala/fastjson"
 )
 
@@ -47,228 +44,118 @@ func NewConnection(url string, key string, option bootstrap.HTTPOption, pteroTyp
 }
 
 func (client *PteroClient) Servers() (*fastjson.Value, error) {
-	response, err := client.Connection.Get(
+	return http2.Get(
+		client,
 		client.endpoint("servers"),
 		client.header(),
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return io.JSONBody(&response.Body)
 }
 
 func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
-	response, err := client.Connection.Get(
+	return http2.Get(
+		client,
 		client.endpoint("servers/"+strconv.Itoa(id)),
 		client.header(),
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return io.JSONBody(&response.Body)
 }
 
 func (client *PteroClient) Execute(uniqueId string, command string) int {
-	body, err := json.Marshal(Body{
-		"command": command,
-	})
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Post(
+	return http2.Post(
+		client,
 		client.endpoint("servers/"+uniqueId+"/command"),
-		bytes.NewReader(body),
 		client.header(),
-	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
+		Body{
+			"command": command,
+		})
 }
 
 func (client *PteroClient) Rename(uniqueId string, name string) int {
-	body, err := json.Marshal(Body{
-		"name": name,
-	})
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Post(
+	return http2.Post(
+		client,
 		client.endpoint("servers/"+uniqueId+"/settings/rename"),
-		bytes.NewReader(body),
 		client.header(),
-	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
+		Body{
+			"name": name,
+		})
 }
 
 func (client *PteroClient) Reinstall(uniqueId string) int {
-	response, err := client.Connection.Post(
+	return http2.Post(
+		client,
 		client.endpoint("servers/"+uniqueId+"/settings/reinstall"),
-		nil,
 		client.header(),
+		nil,
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
 }
 
 func (client *PteroClient) Power(uniqueId string, power string) int {
-	body, err := json.Marshal(Body{
-		"signal": power,
-	})
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Post(
+	return http2.Post(
+		client,
 		client.endpoint("servers/"+uniqueId+"/power"),
-		bytes.NewReader(body),
 		client.header(),
-	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
+		Body{
+			"signal": power,
+		})
 }
 
 func (client *PteroClient) ExternalServerById(id int) (*fastjson.Value, error) {
-	response, err := client.Connection.Get(
-		client.endpoint("servers/external"+strconv.Itoa(id)),
+	return http2.Get(
+		client,
+		client.endpoint("servers/external/"+strconv.Itoa(id)),
 		client.header(),
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return io.JSONBody(&response.Body)
 }
 
 func (client *PteroClient) UpdateDetails(id int, body Body) int {
-	buf, err := json.Marshal(body)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Patch(
+	return http2.Patch(
+		client,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/details"),
-		bytes.NewReader(buf),
 		client.header(),
+		body,
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
 }
 
 func (client *PteroClient) UpdateInfo(id int, body Body) int {
-	buf, err := json.Marshal(body)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Patch(
+	return http2.Patch(
+		client,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/build"),
-		bytes.NewReader(buf),
 		client.header(),
+		body,
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
 }
 
 func (client *PteroClient) UpdateEnvironment(name string, body Body) int {
-	buf, err := json.Marshal(body)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Put(
+	return http2.Put(
+		client,
 		client.endpoint("servers/"+name+"/startup/variable"),
-		bytes.NewReader(buf),
 		client.header(),
+		body,
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
 }
 
 func (client *PteroClient) Environments(name string) (*fastjson.Value, error) {
-	response, err := client.Connection.Get(
+	return http2.Get(
+		client,
 		client.endpoint("servers/"+name+"/startup"),
 		client.header(),
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return io.JSONBody(&response.Body)
 }
 
 func (client *PteroClient) Resources(name string) (*fastjson.Value, error) {
-	response, err := client.Connection.Get(
+	return http2.Get(
+		client,
 		client.endpoint("servers/"+name+"/resources"),
 		client.header(),
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return io.JSONBody(&response.Body)
 }
 
 func (client *PteroClient) UpdateStartup(id int, body Body) int {
-	buf, err := json.Marshal(body)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	response, err := client.Connection.Patch(
+	return http2.Patch(
+		client,
 		client.endpoint("servers/"+strconv.Itoa(id)+"/startup"),
-		bytes.NewReader(buf),
 		client.header(),
+		body,
 	)
-
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	return response.StatusCode
 }
 
 func (client *PteroClient) endpoint(target string) string {

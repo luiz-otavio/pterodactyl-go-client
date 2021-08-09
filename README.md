@@ -1,3 +1,8 @@
+# WARNING
+That repository isn't available for production environment.
+Many endpoints aren't yet implemented.
+Be careful if you are using that module.
+
 # ptero-go
 Pterodactyl wrapper written in Golang
 

@@ -20,6 +20,13 @@ const (
 	Application
 )
 
+const (
+	START = "start"
+	STOP = "stop"
+	RESTART = "restart"
+	KILL = "kill"
+)
+
 type PteroClient struct {
 	Key string
 	URL string
@@ -63,6 +70,86 @@ func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
 	}
 
 	return io.JSONBody(&response.Body)
+}
+
+func (client *PteroClient) Execute(uniqueId string, command string) int {
+	body, err := json.Marshal(Body{
+		"command": command,
+	})
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Post(
+		client.endpoint("servers/"+uniqueId+"/command"),
+		bytes.NewReader(body),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) Rename(uniqueId string, name string) int {
+	body, err := json.Marshal(Body{
+		"name": name,
+	})
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Post(
+		client.endpoint("servers/"+uniqueId+"/settings/rename"),
+		bytes.NewReader(body),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) Reinstall(uniqueId string) int {
+	response, err := client.Connection.Post(
+		client.endpoint("servers/"+uniqueId+"/settings/reinstall"),
+		nil,
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
+}
+
+func (client *PteroClient) Power(uniqueId string, power string) int {
+	body, err := json.Marshal(Body{
+		"signal": power,
+	})
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	response, err := client.Connection.Post(
+		client.endpoint("servers/"+uniqueId+"/power"),
+		bytes.NewReader(body),
+		client.header(),
+	)
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return response.StatusCode
 }
 
 func (client *PteroClient) ExternalServerById(id int) (*fastjson.Value, error) {

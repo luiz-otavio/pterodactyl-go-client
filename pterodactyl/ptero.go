@@ -43,10 +43,10 @@ func NewConnection(url string, key string, option bootstrap.HTTPOption, pteroTyp
 	}
 }
 
-func (client *PteroClient) Servers() (*fastjson.Value, error) {
+func (client *PteroClient) Servers(page int) (*fastjson.Value, error) {
 	return consumer.Get(
 		&client.Connection,
-		client.endpoint("servers"),
+		client.endpoint("servers?page="+strconv.Itoa(page)),
 		client.header(),
 	)
 }
@@ -55,6 +55,22 @@ func (client *PteroClient) ServerById(id int) (*fastjson.Value, error) {
 	return consumer.Get(
 		&client.Connection,
 		client.endpoint("servers/"+strconv.Itoa(id)),
+		client.header(),
+	)
+}
+
+func (client *PteroClient) ServerByName(name string) (*fastjson.Value, error) {
+	return consumer.Get(
+		&client.Connection,
+		client.endpoint("servers/"+name),
+		client.header(),
+	)
+}
+
+func (client *PteroClient) Permissions() (*fastjson.Value, error) {
+	return consumer.Get(
+		&client.Connection,
+		client.endpoint("permissions"),
 		client.header(),
 	)
 }

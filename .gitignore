@@ -25,5 +25,7 @@ _testmain.go
 *.exe
 
 target/
+dist/
+
 
 .envrc

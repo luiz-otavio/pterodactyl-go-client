@@ -27,5 +27,7 @@ _testmain.go
 target/
 dist/
 
+# Temp files
+to-do.txt
 
 .envrc
